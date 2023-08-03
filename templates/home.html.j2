@@ -1,0 +1,414 @@
+{% extends 'base.html.j2' %}
+
+{% block title %}menrva{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+    <div class="row gx-0 mt-3 p-3">
+        <div class="col-md-4 px-3">
+            <div class="col-md-12 h-100 rounded-3 shadow bg-dark text-white p-3">
+
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="container mb-3">
+                            {% if current_user.pfp %}
+                            <img src="{{ url_for('static', filename='images/pfps/' ~ current_user.pfp) }}"
+                                alt="Profile Picture" class="profile-img shadow">
+                            {% else %}
+                            <!-- Default profile picture -->
+                            <img src="{{ url_for('static', filename='images/default_pfp.png') }}"
+                                alt="Default Profile Picture" class="profile-img shadow">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-sm-10">
+                        <h1 class="text-end">Welcome, {{ username }}!</h1>
+                        <h6 class="text-end">{{ current_user.email }}</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="container">
+                            {% if read_books %}
+                            <h6>
+                                Your favorite genres are {% for genre in top_genres %}<span
+                                    class="badge rounded-pill bg-secondary m-1">{{ genre.name
+                                    }}</span>{% endfor %}
+                            </h6>
+                            <h6>You mostly read {% if avg_length == 'short' %}
+                                <span class="badge rounded-pill ml-1 bg-info">Short</span>
+                                {% elif avg_length == 'medium' %}
+                                <span class="badge rounded-pill ml-1 bg-success">Medium</span>
+                                {% elif avg_length == 'long'%}
+                                <span class="badge rounded-pill ml-1 bg-warning">Long</span>
+                                {% else %}
+                                <span class="badge rounded-pill ml-1 bg-danger">Extra Long</span>
+                                {% endif %}
+                                books
+                            </h6>
+                            {% if current_user.ratings %}
+                            <h6>You give an average rating of <div
+                                    class="badge rounded-pill border border-secondary rating-stars-container">
+                                    {% for i in range(1, 6) %}
+                                    {% if i <= avg_user_rating %} <span class="rating-stars active"
+                                        style="font-size: 14px;">★</span>
+                                        {% else %}
+                                        <span class="rating-stars" style="font-size: 14px;">★</span>
+                                        {% endif %}
+                                        {% endfor %}
+                                </div>
+                            </h6>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="container p-3">
+                    <hr>
+                    {% if yearly_goal %}
+                    {% if status == 'on track' %}
+                    <h5>You are on track to meet your goal. Keep it up!</h5>
+                    {% elif status == 'achieved' %}
+                    <h5>You have achieved your goal. Congratulations!</h5>
+                    {% elif status == 'ahead of' %}
+                    <h5>You are {{ progress }} {{goal_type}} {{ status }} your goal. Great job!</h5>
+                    {% elif status == 'behind' %}
+                    <h5>You are {{ progress }} {{goal_type}} {{ status }} your goal. Don't give up!</h5>
+                    {% endif %}
+                    <br>
+                    <div class="progress rounded-pill bg-med w-100" style="height: 30px;">
+                        <div class="progress-bar rounded-pill bg-primary shadow" role="progressbar"
+                            style="width: {{ goal_percentage }}%; height: 30px;" aria-valuenow="{{ goal_percentage }}"
+                            aria-valuemin="0" aria-valuemax="100">{{
+                            goal_percentage | int }}%</div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <small class="text-light text-muted">Your goal is to read {{ yearly_goal }} {{ goal_type }}
+                                this year,
+                                and
+                                you've read {% if
+                                goal_type ==
+                                'books' %}{{ books_this_year
+                                }}.{% else %}{{ pages_this_year }}.{% endif %}
+                                <br>
+                                You have {{ days_left }} days to finish {{ goal_left }} {% if goal_type ==
+                                'books'%}books{%
+                                else %}pages{% endif %} to
+                                meet your goal.
+                            </small>
+                        </div>
+                        <div class="col-sm-3">
+                            <a href="{{ url_for('user_views.user_settings') }}" class="link-border"><button
+                                    class="btn rounded-pill btn-outline-primary text-white float-end">Edit
+                                    Goal</button></a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <i>You haven't set a reading goal yet!</i><br><br>
+                    <center><a href="{{ url_for('user_views.user_settings') }}" class="link-border"><button
+                                class="btn btn-outline-primary text-white rounded-pill">Set
+                                Goal</button></a></center>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 px-3">
+            <div class="col-md-12 h-100 rounded-3 bg-dark text-white shadow p-3">
+                <div class="container">
+                    <h2>Your Bookcases:</h2>
+                    <div class="row"><br></div>
+                    <div class="container bg-med rounded-3 shadow mb-3 p-3">
+                        <div class="row gx-1">
+                            <div class="col-sm-3">
+                                <a href="{{ url_for('book_views.to_be_read') }}"><button
+                                        class="btn rounded-pill btn-primary">To Be
+                                        Read</button></a>
+                            </div>
+                            {% for book in tbr_books[:4] %}
+                            <div class="col">
+                                <a href="{{ url_for('book_views.book_details', google_book_id=book.book.google_book_id) }}"
+                                    class="brdshw">
+                                    <img src="{{ book.book.cover }}" alt="{{ book.book.title }} Cover"
+                                        class="rounded-3 shadow" style="height: 100px; margin-bottom: 0px;"></a>
+                            </div>
+                            {% endfor %}
+                            <div class="col">
+                                <span
+                                    class="badge rounded-pill border border-secondary text-secondary text-sm float-end mx-2 my-2">
+                                    {{tbr_books|length }}
+                                    {% if tbr_books|length == 1 %}book{% else %}books{% endif %}
+                                </span>
+                                <span
+                                    class="badge rounded-pill border border-secondary text-secondary text-sm float-end mx-2 my-2">
+                                    {{tbr_shelves|length}}
+                                    {% if tbr_shelves|length == 1 %}
+                                    shelf
+                                    {% else%}
+                                    shelves
+                                    {%endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <hr class="mb-0">
+                    </div>
+                    <div class="row">
+                        <br>
+                    </div>
+                    <div class="container bg-med rounded-3 shadow mb-3 p-3">
+                        <div class="row gx-1">
+                            <div class="col-sm-3">
+                                <a href="{{ url_for('book_views.read') }}"><button
+                                        class="btn rounded-pill btn-primary">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;&nbsp;</button></a>
+                            </div>
+                            {% for book in read_books[:4] %}
+                            <div class="col">
+                                <a href="{{ url_for('book_views.book_details', google_book_id=book.book.google_book_id) }}"
+                                    class="brdshw">
+                                    <img src="{{ book.book.cover }}" alt="{{ book.book.title }} Cover"
+                                        class="rounded-3 shadow" style="height: 100px; margin-bottom: 0px;"></a>
+                            </div>
+                            {% endfor %}
+                            <div class="col">
+                                <span
+                                    class="badge rounded-pill border border-secondary text-secondary text-sm float-end mx-2 my-2">
+                                    {{read_books|length }}
+                                    {% if read_books|length == 1 %}book{% else %}books{% endif %}
+                                </span>
+                                <span
+                                    class="badge rounded-pill border border-secondary text-secondary text-sm float-end mx-2 my-2">
+                                    {{read_shelves|length}}
+                                    {% if read_shelves|length == 1 %}
+                                    shelf
+                                    {% else%}
+                                    shelves
+                                    {%endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <hr class="mb-0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 px-3">
+            <div class="col-md-12 h-100 rounded-3 bg-dark text-white shadow p-3">
+                <div class="container">
+                    <h2>What To Read Next:</h2>
+                    {% if up_next %}
+                    <div class="container px-3">
+                        <div class="card my-3 mx-auto rounded-3 bg-med shadow" style="width: 500px;">
+                            <div class="card-header bg-med-f">
+                                <h3 class="card-title">{{ up_next.book.title }}</h3>
+                            </div>
+                            <div class=" row g-0">
+                                <div class="col-md-4">
+                                    <a
+                                        href="{{ url_for('book_views.book_details', google_book_id=up_next.book.google_book_id) }}"><img
+                                            src="{{ up_next.book.cover }}" class="img-fluid rounded"
+                                            style="height: 220px;" alt="{{ up_next.booktitle }} Cover"></a>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        {% for author in up_next.book.authors %}
+                                        {{ author.name }}
+                                        {% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                        </p>
+                                        <hr>
+                                        {% for genre in up_next.book.genres[:2] %}
+                                        <span class="badge rounded-pill bg-secondary">
+                                            {{ genre.name }}
+                                        </span>
+                                        {% endfor %}
+                                        {% if up_next.book.genres|length > 2 %}
+                                        <small class="text-muted card-text"><br>...and {{ up_next.book.genres|length -2
+                                            }}
+                                            more</small>
+                                        {% endif %}
+                                        <br>
+                                        {% if up_next.book.pages < 250 %} <span class="badge rounded-pill bg-info">
+                                            Short</span>
+                                            {% elif up_next.book.pages < 500 %} <span
+                                                class="badge rounded-pill bg-success">
+                                                Medium</span>
+                                                {% elif up_next.book.pages < 1000 %} <span
+                                                    class="badge rounded-pill bg-warning">Long</span>
+                                                    {% else %}
+                                                    <span class="badge rounded-pill bg-danger">Extra Long</span>
+                                                    {% endif %}
+                                                    <hr>
+                                                    <small style="text-align: justify;">To be Read since {{
+                                                        up_next.created.strftime('%B %d, %Y')
+                                                        }}</small>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-med-f text-muted">
+                                    <div class="container">
+                                        {% if up_next.shelves %}
+                                        {% for shelf in up_next.shelves %}
+                                        <span
+                                            class="badge rounded-pill border border-secondary text-secondary my-0 mx-0">
+                                            {{ shelf.name }}
+                                        </span>
+                                        {% endfor %}
+                                        {% else %}
+                                        <center>
+                                            <small class="text-muted">
+                                                <i>
+                                                    You haven't placed this book on a shelf yet.
+                                                </i>
+                                            </small>
+                                        </center>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <center><a href="{{ url_for('book_views.to_be_read') }}" class="link-border"
+                                style="text-align: center;"><button
+                                    class="btn rounded-pill btn-outline-primary text-white">
+                                    View your To Be Read Bookcase</button></a></center>
+                        {% else %}<br>
+                        <center>
+                            <h5 class="text-muted"><i>You have no "To Be Read" books. Search for some above!</i></h5>
+                        </center>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row gx-0 p-3">
+        <div class="col-sm-12 px-3">
+            <div class="col-md-12 h-100 rounded-3 bg-dark text-white shadow p-3">
+                <h2>Your Recent Reads:</h2><br>
+                <div class="container-fluid">
+                    {% if read_books|length > 0 %}
+                    <div class="row">
+                        {% for book in read_books[:4] %}
+                        <div class="col-sm-3 mb-3 mx-auto" style="max-width: 500px;">
+                            <div class="card bg-med border border-dark rounded-3 shadow">
+                                <div class="card-header bg-med-f">
+
+                                    <h4 class="text-truncate">{{ book.book.title }}</h4>
+
+                                </div>
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <a
+                                            href="{{ url_for('book_views.book_details', google_book_id=book.book.google_book_id) }}"><img
+                                                src="{{ book.book.cover }}" class="img-fluid rounded-3 shadow"
+                                                style="height: 220px;" alt="{{ book.book.title }} Cover"></a>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <p class="text-truncate card-text">
+                                                {% for author in book.book.authors %}
+                                                {{ author.name }}
+                                                {% if not loop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </p>
+                                            <hr>
+                                            {% for genre in book.book.genres[:2] %}
+                                            <span class="badge rounded-pill bg-secondary">
+                                                {{ genre.name }}
+                                            </span>
+                                            {% endfor %}
+                                            {% if book.book.genres|length > 2 %}
+                                            <small class="text-muted card-text"><br>...and {{ book.book.genres|length -2
+                                                }}
+                                                more</small>
+                                            {% endif %}
+                                            <br>
+                                            {% if book.book.pages < 250 %} <span class="badge rounded-pill bg-info">
+                                                Short</span>
+                                                {% elif book.book.pages < 500 %} <span
+                                                    class="badge rounded-pill bg-success">
+                                                    Medium</span>
+                                                    {% elif book.book.pages < 1000 %} <span
+                                                        class="badge rounded-pill bg-warning">
+                                                        Long</span>
+                                                        {% else %}
+                                                        <span class="badge rounded-pill bg-danger">Extra Long</span>
+                                                        {% endif %}
+                                                        <hr>
+                                                        <small style="text-align: justify;">
+                                                            Read on:
+                                                            {{ book.created.strftime('%B %d, %Y') }}
+                                                        </small>
+                                                        <br>
+                                                        {% for rating in book.book.ratings %}
+                                                        {% if rating.user_id == current_user.id %}
+                                                        <div class="rating-stars-container">
+                                                            {% for i in range(1, 6) %}
+                                                            {% if i <= rating.rating %} <span
+                                                                class="rating-stars active" style="font-size: 14px;">
+                                                                ★</span>
+                                                                {% else %}
+                                                                <span class="rating-stars"
+                                                                    style="font-size: 14px;">★</span>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                        </div>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                        {% if not book.book.ratings|selectattr('user_id', 'eq',
+                                                        current_user.id)|list %}
+                                                        <p class="card-text"><small class="text-muted"><i>You haven't
+                                                                    rated this
+                                                                    book
+                                                                    yet.</i></small></p>
+                                                        {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-med-f text-muted">
+                                    <div class="container">
+                                        {% if book.shelves %}
+                                        <small class="text-muted">On your
+                                            {% if book.shelves|length > 1 %}
+                                            shelves
+                                            {% else %}
+                                            shelf
+                                            {% endif %}
+                                            :</small>
+                                        {% for shelf in book.shelves %}
+                                        <span
+                                            class="badge rounded-pill border border-secondary text-secondary my-0 mx-0">
+                                            {{ shelf.name }}
+                                        </span>
+                                        {% endfor %}
+                                        {% else %}
+                                        <small class="text-muted">
+                                            <center><i>
+                                                    You haven't placed this book on a shelf yet.
+                                                </i></center>
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <center>
+                        <h5 class="text-muted"><i>You have no "Read" books. Search for some above!</i></h5>
+                    </center>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+{% endblock %}

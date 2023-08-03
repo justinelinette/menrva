@@ -1,0 +1,6 @@
+/.vscode
+/__pycache__
+/cfg.py
+/instance
+/migrations
+/static/images/pfps

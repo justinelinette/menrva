@@ -1,0 +1,462 @@
+{% extends 'base.html.j2' %}
+
+{% block title %}menrva{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+    <div class="row gx-0 p-3">
+        <div class="col-md-6 p-3">
+            <div class="col-md-12 h-100 rounded-3 bg-dark text-white shadow p-3">
+                <div class="container">
+                    <div class="container m-3 p-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {% if book.cover %}
+                                <img src="{{ book.cover }}" alt="{{ book.title }} Cover" class="rounded-3 shadow"
+                                    style="width: 260px; height: 400px;">
+                                {% else %}
+                                <p>No Cover Available</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <h1>{{ book.title }}</h1>
+                                {% for author in book.authors %}
+                                <h4> {{ author.name }}</h4>
+                                {% endfor %}
+                                <hr>
+                                {% for genre in book.genres %}
+                                <span class="badge rounded-pill bg-secondary">
+                                    {{ genre.name }}
+                                </span>
+                                {% endfor %}
+                                <hr>
+                                <p>{{ book.pages }} pages
+                                    {% if book.pages < 250 %} <span class="badge rounded-pill bg-info">Short</span>
+                                        {% elif book.pages < 500 %} <span class="badge rounded-pill bg-success">
+                                            Medium</span>
+                                            {% elif book.pages < 1000 %} <span class="badge rounded-pill bg-warning">
+                                                Long</span>
+                                                {% else %}
+                                                <span class="badge rounded-pill bg-danger">Extra Long</span>
+                                                {% endif %}
+                                </p>
+
+                                <hr>
+                                <p>Publisher: {{ book.publisher }}
+                                    <br>Date Published: {{ book.date_published }}
+                                </p>
+                                <hr>
+                                <p>Summary:</p>
+                                <div class="overflow-auto" style=" width: 100%; height: 100px;">
+                                    {{ book.summary | safe }}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="container-fluid p-3">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <h4>Average Rating:
+                                        {% if avg_rating > 0 %}
+                                        {{ avg_rating }}</h4>
+                                    <div class="avg-rating-stars-container">
+                                        {% for i in range(1, 6) %}
+                                        {% if avg_rating and avg_rating >= i %}
+                                        <span class="avg-rating-stars active">★</span>
+                                        {% else %}
+                                        <span class="avg-rating-stars">★</span>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    </h4>
+                                    <small class="text-muted">This book hasn't been
+                                        rated
+                                        yet. Be the first!</small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6">
+                                    <h5 class="float-end">This book has been reviewed {{ book.reviews.count() }}
+                                        time{% if
+                                        book.reviews.count() ==
+                                        0
+                                        or book.reviews.count()
+                                        > 1
+                                        %}s{%
+                                        endif %}.</h5>
+                                </div>
+                            </div>
+                            {% if book.reviews.count() > 0 %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <button class="btn rounded-pill btn-outline-primary text-white float-end">View All
+                                        Reviews</button>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 p-3">
+            <div class="col-md-12 h-100 rounded-3 bg-dark text-white shadow p-3">
+                <!--INTERACTION SECTION START-->
+                <div class="container my-3">
+                    {% if user_book %}
+                    <div class="row">
+                        <div class="col-sm-8">
+                            {% if user_book.type == 'read' %}
+                            <h2>You read this book on {{ user_book.created.strftime('%B %d, %Y') }}</h2>
+                            {% else %}
+                            <h2>On To Be Read since {{ user_book.created.strftime('%B %d, %Y') }}</h2>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            {% if user_book.type != 'read' %}
+                            <div class="btn-toolbar float-end">
+                                <form method="post"
+                                    action="{{ url_for('user_book_views.change_book_type', user_book_id=user_book.id) }}">
+                                    <input type="hidden" name="user_book_id" value="{{ user_book.id }}">
+                                    <button class="btn rounded-pill btn-primary m-1" type="submit">Move to Read</button>
+                                </form>
+                                <form method="post"
+                                    action="{{ url_for('user_book_views.delete_book', user_book_id=user_book.id) }}">
+                                    <input type="hidden" name="user_book_id" value="{{ user_book.id }}">
+                                    <button class="btn rounded-pill btn-secondary m-1" type="submit">Remove</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="btn-toolbar float-end">
+                                <form method="post"
+                                    action="{{ url_for('user_book_views.change_book_type', user_book_id=user_book.id) }}">
+                                    <input type="hidden" name="user_book_id" value="{{ user_book.id }}">
+                                    <button class="btn rounded-pill btn-primary m-1" type="submit">Move to To Be
+                                        Read</button>
+                                </form>
+                                <form method="post"
+                                    action="{{ url_for('user_book_views.delete_book', user_book_id=user_book.id) }}">
+                                    <input type="hidden" name="user_book_id" value="{{ user_book.id }}">
+                                    <button type="submit"
+                                        class="btn btn-outline-danger rounded-pill border-3 float-end"><i
+                                            class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if user_shelves %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="container">
+                                <br>
+                                {% if shelves %}
+                                <p class="text-muted text-center">This book is on {{ shelves|length }} of your
+                                    shelves:
+                                    {% for shelf in shelves %}
+                                    <span class="badge rounded-pill bg-primary">
+                                        {{shelf.name }}</span>
+                                    {% endfor %}
+                                </p>
+                                {% else %}
+                                <p class="text-muted text-center">You haven't added this book to any of your
+                                    shelves.
+                                </p>
+                                {% endif %}
+                                <form method="post" action="{{ url_for('book_views.to_be_read') }}">
+                                    <div class="input-group rounded-pill bg-dark border border-secondary border-3">
+                                        <input type="hidden" name="form_type" value="add_to_shelf">
+                                        <input type="hidden" name="user_book_id" value="{{ user_book.id }}">
+                                        <select class="form-select bg-dark border-dark rounded-pill text-white"
+                                            id="shelf_id" aria-label="shelf_select" name="shelf_id">
+                                            <option class="bg-dark text-white" selected>Choose...</option>
+                                            {% for shelf in user_shelves %}
+                                            <option class="bg-dark text-white value=" {{ shelf.id }}">{{ shelf.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <button class="btn rounded-pill btn-secondary" type="submit">Add
+                                            to
+                                            Shelf</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <br>
+                            <hr>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% else %}
+
+                    <div class="row d-flex">
+                        <div class="container d-flex my-auto">
+                            <div class="col-sm-6 text-start my-auto">
+                                <h3>You haven't placed this book yet.</h3>
+                            </div>
+
+                            <div class="col-sm-6 my-auto">
+                                <form method="post"
+                                    action="{{ url_for('user_book_views.place_book', google_book_id=book.google_book_id) }}">
+                                    <div class="input-group bg-dark border border-3 border-secondary rounded-pill p-0">
+                                        <input type="hidden" name="google_book_id" value="{{ book.google_book_id }}">
+                                        <div class="input-group-prepend bg-dark rounded-pill">
+                                            <div class="input-group-text bg-dark border-0 rounded-pill text-white">Add
+                                                to Bookcase:</div>
+                                        </div>
+                                        <select class="form-select bg-dark border-dark text-white rounded-pill"
+                                            name="book_type" id="type">
+                                            <option class="bg-dark text-white" value="read">Read</option>
+                                            <option class="bg-dark text-white" value="tbr">To be Read</option>
+                                        </select>
+                                        <button class="btn rounded-pill btn-primary rounded-pill" type="submit">Place
+                                            Book</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
+                        <div class="col-sm-12 mx-auto">
+                            <br>
+                            <hr>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <!--INTERACTION SECTION STOP-->
+                <!--REVIEW SECTION START-->
+                <div class="container my-3">
+                    {% if user_review %}
+                    <div id="review-text">
+                        <div class="mb-3 p-3">
+                            <h5>Your Review:</h5>
+                            <div class="container w-75 bg-med shadow rounded-3 p-3">
+                                <h6>{{ user_review.title }}</h6>
+                                <div class="rating-stars-container d-flex"
+                                    onload="highlightStars({{ user_rating.rating }})"
+                                    onmouseover="highlightStars({{ user_rating.rating }})"
+                                    onmouseout="highlightStars({{ user_rating.rating }})">
+                                    {% for i in range(1, 6) %}
+                                    {% if user_rating.rating and user_rating.rating >= i %}
+                                    <span class="rating-stars active" onclick="setRating({{ i }})">★</span>
+                                    {% else %}
+                                    <span class="rating-stars" onclick="setRating({{ i }})">★</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <form id="rating-form" method="post"
+                                        action="{{ url_for('rating_views.rate_book', book_id=book.id) }}">
+                                        <input type="hidden" name="book_id" value="{{ book.id }}">
+                                        <input type="hidden" id="rating-input" name="rating"
+                                            value="{{ user_rating.rating }}">
+                                    </form>
+                                    {% if user_rating.rating %}
+                                    <form method="post"
+                                        action="{{ url_for('rating_views.delete_rating', rating_id=user_rating.id) }}">
+                                        <button class="btn badge btn-outline-secondary rounded-pill mx-2"
+                                            type="submit">Clear
+                                            Rating</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+
+                                <p class="overflow-auto p-3" style=" width: 100%; height: min-content;">
+                                    {{
+                                    user_review.body }}</p>
+
+                                <div class="container d-flex justify-content-end ">
+                                    <button class="btn rounded-pill btn-primary mx-1 float-end mx-1"
+                                        id="edit-review-btn" onclick="showEditReviewForm()">Edit Review</button>
+                                    <form method="post"
+                                        action="{{ url_for('review_views.delete_review', review_id=user_review.id) }}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button class="btn rounded-pill btn-primary float-end mx-1" type="submit">Delete
+                                            Review</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <form id="edit-review-form" method="post"
+                        action="{{ url_for('review_views.review_book', book_id=book.id) }}" style="display: none;">
+                        <div class="mb-3 p-3">
+                            <h5>Your Review:</h5>
+                            <div class="container w-75 bg-med shadow rounded-3 p-3">
+                                <div class="rating-stars-container d-flex"
+                                    onload="highlightStars({{ user_rating.rating }})"
+                                    onmouseover="highlightStars({{ user_rating.rating }})"
+                                    onmouseout="highlightStars({{ user_rating.rating }})">
+                                    {% for i in range(1, 6) %}
+                                    {% if user_rating.rating and user_rating.rating >= i %}
+                                    <span class="rating-stars active" onclick="setRating({{ i }})">★</span>
+                                    {% else %}
+                                    <span class="rating-stars" onclick="setRating({{ i }})">★</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <form id="rating-form" method="post"
+                                        action="{{ url_for('rating_views.rate_book', book_id=book.id) }}">
+                                        <input type="hidden" name="book_id" value="{{ book.id }}">
+                                        <input type="hidden" id="rating-input" name="rating"
+                                            value="{{ user_rating.rating }}">
+                                    </form>
+                                    {% if user_rating.rating %}
+                                    <form method="post"
+                                        action="{{ url_for('rating_views.delete_rating', rating_id=user_rating.id) }}">
+                                        <button class="btn badge btn-outline-secondary rounded-pill mx-2"
+                                            type="submit">Clear
+                                            Rating</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                <br>
+                                <input type="hidden" name="book_id" value="{{ book.id }}">
+                                <label for="title" class="col-sm-4 col-form-label">Review Title:</label>
+                                <input type="text" name="title"
+                                    class="form-control bg-dark border-dark text-white rounded-3"
+                                    value="{{ user_review.title }}">
+                                <br>
+                                <label for="review" class="col-sm-4 col-form-label" id="review">Edit Review:</label>
+                                <textarea class="form-control bg-dark border-dark text-white rounded-3" name="review"
+                                    id="review" rows="4"
+                                    cols="50">{% if user_review.body %}{{ user_review.body }}{% else %}{% endif %}</textarea><br>
+
+                                <div class="container d-flex justify-content-end ">
+
+                                    <button class="btn rounded-pill btn-primary float-end mx-1" type="submit">Update
+                                        Review</button>
+
+
+                                    <button class="btn rounded-pill btn-primary float-end mx-1" type="button"
+                                        onclick="cancelEditReview()">Cancel</button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="mb-3 p-3">
+                        <h5>Review this book:</h5>
+                        <div class="mb-3">
+                            <div class="container w-75 bg-med shadow rounded-3 p-3">
+                                <div class="rating-stars-container d-flex"
+                                    onload="highlightStars({{ user_rating.rating }})"
+                                    onmouseover="highlightStars({{ user_rating.rating }})"
+                                    onmouseout="highlightStars({{ user_rating.rating }})">
+                                    {% for i in range(1, 6) %}
+                                    {% if user_rating.rating and user_rating.rating >= i %}
+                                    <span class="rating-stars active" onclick="setRating({{ i }})">★</span>
+                                    {% else %}
+                                    <span class="rating-stars" onclick="setRating({{ i }})">★</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <form id="rating-form" method="post"
+                                        action="{{ url_for('rating_views.rate_book', book_id=book.id) }}">
+                                        <input type="hidden" name="book_id" value="{{ book.id }}">
+                                        <input type="hidden" id="rating-input" name="rating"
+                                            value="{{ user_rating.rating }}">
+                                    </form>
+                                    {% if user_rating.rating %}
+                                    <form method="post"
+                                        action="{{ url_for('rating_views.delete_rating', rating_id=user_rating.id) }}">
+                                        <button class="btn badge btn-outline-secondary rounded-pill mx-2"
+                                            type="submit">Clear
+                                            Rating</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                <form method="post" action="{{ url_for('review_views.review_book', book_id=book.id) }}">
+                                    <input type="hidden" name="book_id" value="{{ book.id }}">
+                                    <label for="title" class="col-sm-4 col-form-label">Give your review a
+                                        title:</label>
+                                    <input type="text" name="title"
+                                        class="form-control bg-dark border-dark text-white rounded-3"
+                                        placeholder="{{ current_user.username }}'s Review">
+                                    <label for="review"></label>
+                                    <textarea class="form-control bg-dark border-dark text-white rounded-3"
+                                        name="review" id="review" placeholder="Write your review..."></textarea><br>
+                                    <div class="row">
+                                        <form method="post"
+                                            action="{{ url_for('review_views.delete_review', review_id=user_review.id) }}">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <div class="container">
+                                                <button class="btn rounded-pill btn-primary float-end"
+                                                    type="submit">Submit
+                                                    Review</button>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                    {% endif %}
+                </div>
+                <!--REVIEW SECTION STOP-->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script>
+    function setRating(rating) {
+        const stars = document.querySelectorAll('.rating-stars');
+        const ratingInput = document.getElementById('rating-input');
+
+        for (let i = 1; i <= 5; i++) {
+            stars[i - 1].classList.remove('active');
+        }
+
+        for (let i = 1; i <= rating; i++) {
+            stars[i - 1].classList.add('active');
+        }
+
+        ratingInput.value = rating;
+        document.getElementById('rating-form').submit();
+    }
+
+    function highlightStars(rating) {
+        const stars = document.querySelectorAll('.rating-stars');
+
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                stars[i - 1].classList.add('active');
+            } else {
+                stars[i - 1].classList.remove('active');
+            }
+        }
+    }
+
+    function showEditReviewForm() {
+        document.getElementById('review-text').style.display = 'none';
+        document.getElementById('edit-review-form').style.display = 'block';
+    }
+
+    function cancelEditReview() {
+        document.getElementById('edit-review-form').style.display = 'none';
+        document.getElementById('review-text').style.display = 'block';
+    }
+
+    // On page load, display the correct gold stars corresponding to the rating
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput = document.getElementById('rating-input');
+        const currentRating = parseInt(ratingInput.value);
+
+        highlightStars(currentRating);
+    });
+</script>
+
+{% endblock %}

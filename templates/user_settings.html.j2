@@ -1,0 +1,182 @@
+{% extends 'base.html.j2' %}
+
+{% block title %}menrva{% endblock %}
+
+{% block content %}
+
+<div class="container justify-content-center align-items-center p-5">
+    <div class="container card shadow rounded-3 w-50 p-3">
+        <div class="row row-cols-auto">
+            <div class="col-sm-12 p-3">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="container">
+                            {% if current_user.pfp %}
+                            <img src="{{ url_for('static', filename='images/pfps/' ~ current_user.pfp) }}"
+                                alt="Profile Picture" class="profile-img shadow">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/default_pfp.png') }}"
+                                alt="Default Profile Picture" class="profile-img shadow">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="container"><br>
+                            <h1>User Settings</h1>
+                            <h4>{{ current_user.username }}</h4>
+                            <h6>{{ current_user.email }}</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <center>
+                        <hr style="width:90%;"><br>
+                    </center>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 justify-content-center align-items-center">
+                        <form method="post" action="{{ url_for('user_views.user_settings') }}">
+                            <div class="form-group row">
+                                <div class="input-group">
+                                    <input type="hidden" name="form_type" value="set_yearly_goal">
+                                    <label for="yearly_goal" class="col-sm-4 col-form-label">Reading Goal:</label>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">I want to read</span>
+                                    </div>
+                                    <input type="text" class="form-control col-sm-1" id="yearly_goal" name="yearly_goal"
+                                        placeholder="{{ current_user.yearly_goal }}">
+                                    <select class="form-select" id="goal_type" aria-label="goal_type" name="goal_type">
+                                        <option value="books">books</option>
+                                        <option value="pages">pages</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">this year</span>
+                                    </div>
+                                    <div class="col-sm-3"></div>
+                                </div>
+                            </div>
+                            <div class="form-group-row">
+                                <button type="submit" class="btn btn-secondary m-3 float-end">Set
+                                    Goal</button>
+                            </div>
+                    </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <center>
+                        <hr style="width:90%;"><br>
+                    </center>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 justify-content-center align-items-center">
+                        <form method="post" action="{{ url_for('user_views.user_settings') }}"
+                            enctype="multipart/form-data">
+                            <div class="form-group row">
+                                <div class="input-group">
+                                    <input type="hidden" name="form_type" value="upload_profile_image">
+                                    <label for="formFile" class="col-sm-4 col-form-label">Choose Profile Image:
+                                    </label>
+                                    <input class="rounded-3 form-control col-sm-1" type="file" name="profile_image"
+                                        accept="image/*" id="formFile" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group-row">
+                                <button type="submit" class="btn btn-secondary m-3 float-end">Upload</button>
+                            </div>
+                    </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <center>
+                        <hr style="width:90%;"><br>
+                    </center>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 justify-content-center align-items-center">
+                        <form method="post" action="{{ url_for('user_views.user_settings') }}">
+                            <div class="form-group row">
+                                <div class="input-group">
+                                    <input type="hidden" name="form_type" value="change_email">
+                                    <label for="new_email" class="col-sm-4 col-form-label">New Email:</label>
+                                    <input type="text" class="rounded-3 form-control col-sm-1" id="new_email"
+                                        name="new_email" required>
+                                </div>
+                            </div>
+                            <div class="form-group-row">
+                                <button type="submit" class="btn btn-secondary m-3 float-end">Change
+                                    Email</button>
+                            </div>
+                    </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <center>
+                        <hr style="width:90%;"><br>
+                    </center>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 justify-content-center align-items-center">
+                        <form method="post" action="{{ url_for('user_views.user_settings') }}">
+                            <div class="form-group row">
+                                <div class="input-group">
+                                    <input type="hidden" name="form_type" value="change_username">
+                                    <label for="new_username" class="col-sm-4 col-form-label">New Username:</label>
+                                    <input type="text" class="rounded-3 form-control col-sm-1" id="new_username"
+                                        name="new_username" required>
+                                </div>
+                            </div>
+                            <div class="form-group-row">
+                                <button type="submit" class="btn btn-secondary m-3 float-end">Change
+                                    Username</button>
+                            </div>
+                    </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <center>
+                        <hr style="width:90%;"><br>
+                    </center>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 justify-content-center align-items-center">
+                        <form method="post" action="{{ url_for('user_views.user_settings') }}">
+                            <div class="form-group row">
+                                <div class="input-group">
+                                    <input type="hidden" name="form_type" value="change_password">
+                                    <label for="current_password" class="col-sm-4 col-form-label">Current
+                                        Password:</label>
+                                    <input type="password" class="rounded-3 form-control col-sm-1" id="current_password"
+                                        name="current_password" required>
+                                </div>
+                                <div class="form-group-row"><br></div>
+                                <div class="form-group-row">
+                                    <div class="input-group">
+                                        <input type="hidden" name="form_type" value="change_password">
+                                        <label for="new_password" class="col-sm-4 col-form-label">New
+                                            Password:</label>
+                                        <input type="password" class="rounded-3 form-control col-sm-1" id="new_password"
+                                            name="new_password" required>
+                                    </div>
+                                </div>
+                                <div class="form-group-row"><br></div>
+                                <div class="form-group-row">
+                                    <div class="input-group">
+                                        <input type="hidden" name="form_type" value="change_password">
+                                        <label for="confirm_new_password" class="col-sm-4 col-form-label">Confirm New
+                                            Password:</label>
+                                        <input type="password" class="rounded-3 form-control col-sm-1"
+                                            id="confirm_new_password" name="confirm_new_password" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group-row">
+                                <button type="submit" class="btn btn-secondary m-3 float-end">Change
+                                    Password</button>
+                            </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endblock %}

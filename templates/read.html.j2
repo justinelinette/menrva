@@ -1,0 +1,465 @@
+{% extends 'base.html.j2' %}
+
+{% block title %}menrva{% endblock %}
+
+{% block content %}
+
+
+<body>
+
+    <!-- Generated markup by the plugin -->
+
+    <div class="container-fluid px-4">
+        <div class="row gx-0 mt-3 p-3">
+            <div class="col-sm-12 px-3">
+                <div class="col-md-12 h-100 rounded-3 shadow bg-dark text-white p-3">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-1">
+                                <div class="d-grid gap-2">
+                                    <button type="button"
+                                        class="btn btn-primary rounded-pill accordian-button acc-primary"
+                                        style="height: auto;" data-bs-toggle="collapse" data-bs-target="#collapse-b1"
+                                        aria-expanded="false" aria-controls="collapse-b1">
+                                        All View
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-1">
+                                <div class="d-grid gap-2">
+                                    <button type="button"
+                                        class="btn btn-primary rounded-pill accordian-button acc-primary"
+                                        style="height: auto;" data-bs-toggle="collapse" data-bs-target="#collapse-b2"
+                                        aria-expanded="false" aria-controls="collapse-b2">
+                                        Shelf View
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <form method="post" action="{{ url_for('book_views.read') }}" id="filter-form">
+                                    <div class="input-group bg-dark border border-3 border-secondary rounded-pill p-0">
+                                        <input type="hidden" name="form_type" value="sort">
+                                        <select class="form-select bg-dark border-dark text-white rounded-pill"
+                                            id="sort" aria-label="sort" name="sort">
+                                            <option selected>Sort by...</option>
+                                            <option value="date">Date Logged</option>
+                                            <option value="title">Title</option>
+                                            <option value="author">Author</option>
+                                            <option value="rating">Rating</option>
+                                            <option value="pages">Pagecount</option>
+                                        </select>
+                                        <button class="btn btn-secondary rounded-pill" type="submit">Apply</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <br>
+                        </div>
+
+                    </div>
+
+
+                    <div id="myGroup"> <!-- Add the parent id here -->
+                        <div class="collapse show" id="collapse-b1" data-bs-parent="#myGroup">
+                            <div class="container-fluid">
+                                <div class="row ml-auto">
+                                    {% for book in user_books %}
+                                    <div class="col-sm-3 mb-3 mx-auto card-group" style="max-width: 500px;">
+                                        <div class="card bg-med text-white shadow m-3">
+                                            <div class="card-header bg-med-f">
+                                                <div class="row">
+                                                    <div class="col-sm-10">
+                                                        <h4 class=" card-title text-truncate">{{ book.book.title }}
+                                                        </h4>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row g-0">
+                                                <div class="col-md-4">
+                                                    <a
+                                                        href="{{ url_for('book_views.book_details', google_book_id=book.book.google_book_id) }}"><img
+                                                            src="{{ book.book.cover }}" class="rounded-3 shadow"
+                                                            style="height: 215px; width: 150px;"
+                                                            alt="{{ book.book.title }} Cover"></a>
+                                                </div>
+                                                <div class="col-md-8 card-body">
+                                                    <h5 class="text-truncate card-text">
+                                                        {% for author in book.book.authors %}
+                                                        {{ author.name }}
+                                                        {% if not loop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </h5>
+                                                    <hr>
+                                                    {% for genre in book.book.genres[:2] %}
+                                                    <span class="badge rounded-pill bg-secondary">
+                                                        {{ genre.name }}
+                                                    </span>
+                                                    {% endfor %}
+                                                    {% if book.book.genres|length > 2 %}
+                                                    <small class="text-muted card-text"><br>...and {{
+                                                        book.book.genres|length -2
+                                                        }}
+                                                        more</small>
+                                                    {% endif %}
+                                                    <hr>
+                                                    <small style="text-align: justify;">Read on {{
+                                                        book.created.strftime('%B %d, %Y')
+                                                        }}</small><br>
+                                                    {% for review in book.book.reviews %}
+                                                    {% if review.user_id == current_user.id %}
+                                                    <div class="rating-stars-container">
+                                                        {% for i in range(1, 6) %}
+                                                        {% if i <= review.rating %} <span class="rating-stars active"
+                                                            style="font-size: 14px;">
+                                                            ★</span>
+                                                            {% else %}
+                                                            <span class="rating-stars" style="font-size: 14px;">★</span>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% if not book.book.reviews|selectattr('user_id', 'eq',
+                                                    current_user.id)|list %}<small class="text-muted"><i>You haven't
+                                                            rated this book yet.</i></small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="card-footer bg-med-f text-muted">
+
+                                                <form method="post"
+                                                    action="{{ url_for('shelf_views.add_to_shelf', user_book_id=book.id) }}">
+                                                    <div class="input-group rounded-pill bg-dark p-2">
+                                                        <select
+                                                            class="form-select bg-dark border-dark text-white rounded-pill half-l"
+                                                            id="shelf_id" aria-label="shelf_select" name="shelf_id">
+                                                            <option selected>Choose...</option>
+                                                            {% for shelf in shelves %}
+                                                            <option value="{{ shelf.id }}">{{ shelf.name }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <button
+                                                            class="btn btn-outline-primary border-3 text-white rounded-pill half-r"
+                                                            type="submit">Add
+                                                            to
+                                                            Shelf</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse" id="collapse-b2" data-bs-parent="#myGroup">
+                        <div class="row">
+                            <div class="col-sm-12 input-group">
+                                <form method="post" action="{{ url_for('shelf_views.create_shelf', type='read') }}">
+                                    <input type="hidden" name="form_type" value="create_shelf">
+                                    <div class="form-row align-items-center">
+                                        <div class="col-sm-12 my-1">
+                                            <div
+                                                class="input-group bg-dark border border-3 border-secondary rounded-pill p-0">
+                                                <div class="input-group-prepend bg-dark rounded-pill">
+                                                    <div
+                                                        class="input-group-text bg-dark border-0 rounded-pill text-white">
+                                                        New Shelf:
+                                                    </div>
+                                                </div>
+                                                <input type="text" name="name" required
+                                                    class="form-control bg-dark border-dark text-white rounded-pill"
+                                                    id="inlineFormInputGroupUsername" placeholder="Shelf Name">
+                                                <button type="submit"
+                                                    class="btn btn-secondary rounded-pill">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <br>
+                        </div>
+                        {% for shelf in shelves %}
+                        <div class="row m-3 p-3">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="row align-items-center">
+                                        <div class="col-sm-6 my-1">
+                                            <h2 class="text-white">{{ shelf.name }} <button type="button"
+                                                    class="btn btn-outline-secondary border-0 rounded-pill"
+                                                    data-bs-toggle="modal" data-bs-target="#editshelf">
+                                                    <i class="fa fa-pencil-square-o my-0" aria-hidden="true"
+                                                        data-bs-toggle="tooltip" data-bs-placement="right"
+                                                        title="Manage Shelf"></i>
+                                                </button></h2>
+                                        </div>
+                                        <div class="col-sm-6 my-1">
+
+                                            <!--MODAL START-->
+                                            <div class="modal fade" id="editshelf" tabindex="-1"
+                                                aria-labelledby="editshelfLabel" aria-hidden="true">
+                                                <div
+                                                    class="modal-dialog modal-dark bg-dark rounded-3 border border-dark border-0">
+                                                    <div class="modal-content bg-dark rounded-3">
+                                                        <div class="modal-header rounded-3 border-dark bg-dark">
+                                                            <h5 class="modal-title" id="editshelfLabel">Edit Shelf:
+                                                                {{
+                                                                shelf.name }}
+                                                            </h5>
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary rounded-pill border-3"
+                                                                data-bs-dismiss="modal" aria-label="Close"><i
+                                                                    class="fa-solid fa-xmark h6 my-0"></i></button>
+                                                        </div>
+                                                        <div class="modal-body bg-dark border-dark">
+                                                            <form method="post"
+                                                                action="{{ url_for('shelf_views.edit_shelf', shelf_id=shelf.id) }}">
+                                                                <div
+                                                                    class="form-row bg-dark rounded-pill border border-secondary border-3 align-items-center">
+                                                                    <div class="col-sm-12 my-1">
+                                                                        <div
+                                                                            class="input-group bg-dark rounded-pill text-white">
+                                                                            <div
+                                                                                class="input-group-prepend bg-dark rounded-pill text-white border-dark">
+                                                                                <div
+                                                                                    class="input-group-text bg-dark rounded-pill border-dark text-white">
+                                                                                    Change Name:</div>
+                                                                            </div>
+                                                                            <input type="text" name="new_name" required
+                                                                                class="form-control bg-dark text-white border-dark rounded-pill"
+                                                                                id="inlineFormInputGroupUsername"
+                                                                                placeholder="Shelf Name">
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                        </div>
+                                                        <div class="modal-footer border-dark bg-dark">
+                                                            <button type="submit"
+                                                                class="btn btn-primary rounded-pill">Save
+                                                                Changes</button></form>
+                                                            <form method="post"
+                                                                action="{{ url_for('shelf_views.delete_shelf', shelf_id=shelf.id) }}">
+                                                                <button type="submit"
+                                                                    class="btn btn-outline-danger rounded-pill border-3 float-end"><i
+                                                                        class="fa-regular fa-trash-can"></i></button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--MODAL END-->
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-8"></div>
+                            </div>
+                            {% if shelf.books.count() == 0 %}
+                            <div class="row ml-auto">
+                                <div class="col-sm-12">
+                                    <center>
+                                        <h5 class="text-muted"><i>You have no books on this shelf. Place some!</i>
+                                        </h5>
+                                    </center>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="row ml-auto">
+                                {% for book in shelf.books %}
+                                <div class="col-sm-3 mb-3 mx-auto card-group" style="max-width: 500px;">
+                                    <div class="card bg-med text-white shadow m-3">
+                                        <div class="card-header bg-med-f">
+                                            <div class="row">
+                                                <div class="col-sm-10">
+                                                    <h4 class=" card-title text-truncate">{{ book.book.title }}
+                                                    </h4>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <form method="post"
+                                                        action="{{ url_for('shelf_views.remove_from_shelf', user_book_id=book.id, shelf_id=shelf.id) }}">
+                                                        <button
+                                                            class="btn btn-outline-danger border-3 rounded-pill float-end"
+                                                            type="submit" data-bs-toggle="tooltip"
+                                                            data-bs-placement="right" title="Remove from Shelf"><i
+                                                                class="fa-solid fa-xmark h6 my-0"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-0">
+                                            <div class="col-md-4">
+                                                <a
+                                                    href="{{ url_for('book_views.book_details', google_book_id=book.book.google_book_id) }}"><img
+                                                        src="{{ book.book.cover }}" class="rounded-3 shadow"
+                                                        style="height: 215px; width: 135px;"
+                                                        alt="{{ book.book.title }} Cover"></a>
+                                            </div>
+                                            <div class="col-md-8 card-body">
+                                                <h5 class="text-truncate card-text">
+                                                    {% for author in book.book.authors %}
+                                                    {{ author.name }}
+                                                    {% if not loop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </h5>
+                                                <hr>
+                                                {% for genre in book.book.genres[:2] %}
+                                                <span class="badge rounded-pill bg-secondary">
+                                                    {{ genre.name }}
+                                                </span>
+                                                {% endfor %}
+                                                {% if book.book.genres|length > 2 %}
+                                                <small class="text-muted card-text"><br>...and {{
+                                                    book.book.genres|length -2
+                                                    }}
+                                                    more</small>
+                                                {% endif %}
+                                                <hr>
+                                                <small style="text-align: justify;">Read on {{
+                                                    book.created.strftime('%B %d, %Y')
+                                                    }}</small><br>
+                                                {% for review in book.book.reviews %}
+                                                {% if review.user_id == current_user.id %}
+                                                <div class="rating-stars-container">
+                                                    {% for i in range(1, 6) %}
+                                                    {% if i <= review.rating %} <span class="rating-stars active"
+                                                        style="font-size: 14px;">
+                                                        ★</span>
+                                                        {% else %}
+                                                        <span class="rating-stars" style="font-size: 14px;">★</span>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                {% endfor %}
+                                                {% if not book.book.reviews|selectattr('user_id', 'eq',
+                                                current_user.id)|list %}<small class="text-muted"><i>You haven't
+                                                        rated this book yet.</i></small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-med-f text-muted">
+
+                                            <form method="post"
+                                                action="{{ url_for('shelf_views.add_to_shelf', user_book_id=book.id) }}">
+                                                <div class="input-group rounded-pill bg-dark p-2">
+                                                    <select
+                                                        class="form-select bg-dark border-dark text-white rounded-pill half-l"
+                                                        id="shelf_id" aria-label="shelf_select" name="shelf_id">
+                                                        <option selected>Choose...</option>
+                                                        {% for shelf in shelves %}
+                                                        <option value="{{ shelf.id }}">{{ shelf.name }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <button
+                                                        class="btn btn-outline-primary border-3 text-white rounded-pill half-r"
+                                                        type="submit">Add
+                                                        to
+                                                        Shelf</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                            <div class="row">
+                                <center>
+                                    <hr class="text-white" style="width: 90%;">
+                                </center>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        // JavaScript to handle form submission and preserve selected sorting option
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the selected sorting option from URL query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortOption = urlParams.get('sort');
+
+            // Set the selected sorting option in the <select> element
+            if (sortOption) {
+                document.getElementById('sort').value = sortOption;
+            }
+
+            // Add event listener to handle form submission
+            document.getElementById('filter-form').addEventListener('submit', function (event) {
+                // Prevent the form from submitting normally
+                event.preventDefault();
+
+                // Get the selected sorting option
+                const sortOption = document.getElementById('sort').value;
+
+                // Add the sorting option as a query parameter to the form action URL
+                const formAction = this.action + '?sort=' + sortOption;
+
+                // Set the form action to the updated URL
+                this.action = formAction;
+
+                // Submit the form
+                this.submit();
+            });
+
+            $(document).ready(function () {
+                var lastSelectedCollapse = null;
+
+                function hideButtonIfSelected(element) {
+                    if (element.hasClass('show')) {
+                        var button = element.prev();
+                        button.hide();
+                        lastSelectedCollapse = element;
+                    }
+                }
+
+                function showButtonIfLastSelectedCollapse() {
+                    if (lastSelectedCollapse !== null && !lastSelectedCollapse.hasClass('show')) {
+                        lastSelectedCollapse.prev().show();
+                    }
+                }
+
+                function ensureOneOpen() {
+                    var openElements = $('#myGroup .collapse.show');
+                    if (openElements.length === 0) {
+                        $('#myGroup .collapse').first().collapse('show');
+                    }
+                }
+
+                $('#myGroup').on('show.bs.collapse', '.collapse', function () {
+                    hideButtonIfSelected($(this));
+                    ensureOneOpen();
+                });
+                $('#myGroup').on('hide.bs.collapse', '.collapse', function () {
+                    showButtonIfLastSelectedCollapse();
+                    ensureOneOpen();
+                });
+                ensureOneOpen();
+            });
+
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+
+    {% endblock %}

@@ -78,7 +78,7 @@ class UtilFuncs():
         start_of_year = datetime(current_year, 1, 1).date()
         days_passed = (datetime.now().date() - start_of_year).days
 
-        total_goal = current_user.yearly_goal
+        total_goal = current_user.goal.amount
         daily_rate = total_goal / 365
         benchmark = daily_rate * days_passed
         difference = completed - benchmark

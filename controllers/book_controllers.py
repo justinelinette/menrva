@@ -1,6 +1,6 @@
 from datetime import datetime
 import random
-from flask import redirect, render_template, request, url_for
+from flask import request
 from flask_login import current_user
 import requests
 from cfg import google_api_key
@@ -44,16 +44,16 @@ class BookController():
         }
         if tbr_books:
             kwargs['up_next'] = random.choice(tbr_books)
-        yearly_goal = user.yearly_goal
-        if yearly_goal:
-            kwargs['yearly_goal'] = f'{yearly_goal:,}'
-            kwargs['goal_type'] = user.goal_type
-            if user.goal_type == 'books':
+        goal = user.goal
+        if goal:
+            kwargs['goal_amount'] = f'{goal.amount:,}'
+            kwargs['goal_type'] = user.goal.type
+            if user.goal.type == 'books':
                 completed = len(books_this_year)
-            elif user.goal_type == 'pages':
+            elif user.goal.type == 'pages':
                 completed = pages_this_year
-            kwargs['goal_left'] = f'{(yearly_goal - completed):,}'
-            kwargs['goal_percentage'] = completed / yearly_goal * 100
+            kwargs['goal_left'] = f'{(goal.amount - completed):,}'
+            kwargs['goal_percentage'] = completed / goal.amount * 100
             kwargs['progress'], kwargs['status'] = UtilFuncs.calculate_progress(
                 completed)
         return kwargs

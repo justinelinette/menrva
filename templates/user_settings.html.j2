@@ -38,13 +38,13 @@
                         <form method="post" action="{{ url_for('user_views.user_settings') }}">
                             <div class="form-group row">
                                 <div class="input-group">
-                                    <input type="hidden" name="form_type" value="set_yearly_goal">
-                                    <label for="yearly_goal" class="col-sm-4 col-form-label">Reading Goal:</label>
+                                    <input type="hidden" name="form_type" value="set_goal">
+                                    <label for="goal_amount" class="col-sm-4 col-form-label">Reading Goal:</label>
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">I want to read</span>
                                     </div>
-                                    <input type="text" class="form-control col-sm-1" id="yearly_goal" name="yearly_goal"
-                                        placeholder="{{ current_user.yearly_goal }}">
+                                    <input type="text" class="form-control col-sm-1" id="goal_amount" name="goal_amount"
+                                        placeholder="{{ current_user.goal_amount }}">
                                     <select class="form-select" id="goal_type" aria-label="goal_type" name="goal_type">
                                         <option value="books">books</option>
                                         <option value="pages">pages</option>

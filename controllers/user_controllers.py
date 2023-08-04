@@ -1,5 +1,6 @@
 from flask import request, redirect, url_for, flash
 from flask_login import current_user, login_user
+from models.goal import Goal
 from utils.exts import db
 from models.user import User
 
@@ -75,10 +76,10 @@ class UserController():
             User.change_password(
                 current_password, new_password, confirm_new_password)
 
-        elif form_type == 'set_yearly_goal':
-            yearly_goal = request.form.get('yearly_goal')
+        elif form_type == 'set_goal':
+            goal_amount = request.form.get('goal_amount')
             goal_type = request.form.get('goal_type')
-            user.update(yearly_goal=yearly_goal, goal_type=goal_type)
+            Goal.set_goal(goal_amount, goal_type)
 
         elif form_type == 'upload_profile_image':
             profile_image = request.files.get('profile_image')
